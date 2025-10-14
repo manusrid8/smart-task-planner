@@ -106,3 +106,7 @@ Open `frontend/index.html` in your browser to access the dashboard.
 - Demonstrates adding, editing, and completing tasks in real-time.
   
 
+[demo video]
+
+https://github.com/user-attachments/assets/dbceeb3b-45dd-42b3-b773-75ddf94c81e5
+
