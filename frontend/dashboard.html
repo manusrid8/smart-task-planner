@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Task Planner - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background: #fdf6f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+
+    header { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    header h1 { font-size: 28px; color: #5a5a5a; }
+    header button { background: #f28fa1; color: #fff; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; transition: background 0.3s; }
+    header button:hover { background: #e06e85; }
+
+    .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .controls input, .controls button { padding: 10px 12px; border-radius: 10px; border: 1px solid #e0dede; font-size: 16px; }
+    .controls button { border: none; background: #a3cef1; color: #fff; cursor: pointer; transition: background 0.3s; }
+    .controls button:hover { background: #7fb8e6; }
+    .controls input { flex: 1; min-width: 200px; }
+
+    .task-list { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 15px; }
+    .task { background: #fffafc; padding: 15px 20px; border-radius: 15px; box-shadow: 0 6px 15px rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; }
+    .task.completed { opacity: 0.6; text-decoration: line-through; }
+    .task-info { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+    .task-actions button { margin-left: 8px; padding: 6px 10px; border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+    .edit-btn { background: #fdd6a3; color: #5a5a5a; }
+    .edit-btn:hover { background: #fbc67e; }
+    .delete-btn { background: #f28fa1; color: #fff; }
+    .delete-btn:hover { background: #e06e85; }
+    .complete-btn { background: #a3cef1; color: #fff; }
+    .complete-btn:hover { background: #7fb8e6; }
+    .save-btn { background: #6ec1e4; color: #fff; }
+    .save-btn:hover { background: #5aa6d1; }
+
+    input.inline-edit { border: 1px solid #888; padding: 4px 6px; border-radius: 6px; font-size: 15px; width: 90%; }
+
+    .loading { text-align: center; font-size: 18px; color: #555; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1 id="welcomeUser">Welcome, User</h1>
+    <button id="logoutBtn">Logout</button>
+  </header>
+
+  <div class="controls">
+    <input type="text" id="taskTitle" placeholder="Task Title">
+    <input type="text" id="taskDesc" placeholder="Task Description">
+    <button id="addTaskBtn">Add Task</button>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="goalInput" placeholder="Enter your goal to generate tasks">
+    <button id="generateBtn">Generate Tasks</button>
+  </div>
+
+  <div id="loading" class="loading" style="display:none;">Generating tasks...</div>
+  <div class="task-list" id="taskList"></div>
+
+  <script>
+const welcomeUser = document.getElementById('welcomeUser');
+const logoutBtn = document.getElementById('logoutBtn');
+const addTaskBtn = document.getElementById('addTaskBtn');
+const generateBtn = document.getElementById('generateBtn');
+const taskList = document.getElementById('taskList');
+const taskTitle = document.getElementById('taskTitle');
+const taskDesc = document.getElementById('taskDesc');
+const goalInput = document.getElementById('goalInput');
+const loadingDiv = document.getElementById('loading');
+
+
+const username = localStorage.getItem('username') || 'User';
+welcomeUser.textContent = `Welcome, ${username}`;
+
+logoutBtn.addEventListener('click', () => {
+  localStorage.clear();
+  window.location.href = 'index.html';
+});
+
+// Fetch all tasks
+async function fetchTasks() {
+  try {
+    const res = await fetch('http://localhost:5000/api/plan');
+    const data = await res.json();
+    renderTasks(data);
+  } catch (err) { console.error(err); }
+}
+
+// Render tasks
+function renderTasks(tasks) {
+  taskList.innerHTML = '';
+  tasks.forEach(task => {
+    const taskDiv = document.createElement('div');
+    taskDiv.className = 'task' + (task.completed ? ' completed' : '');
+
+    const taskInfo = document.createElement('div');
+    taskInfo.className = 'task-info';
+    const titleSpan = document.createElement('strong');
+    titleSpan.textContent = task.title;
+    const descSpan = document.createElement('span');
+    descSpan.textContent = `${task.description} (Est: ${task.estimated_days || 1} days)`;
+    taskInfo.appendChild(titleSpan);
+    taskInfo.appendChild(descSpan);
+
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'task-actions';
+
+    const completeBtn = document.createElement('button');
+    completeBtn.className = 'complete-btn';
+    completeBtn.textContent = task.completed ? 'Undo' : 'Complete';
+    completeBtn.onclick = () => toggleComplete(task.id);
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'edit-btn';
+    editBtn.textContent = 'Edit';
+    editBtn.onclick = () => inlineEdit(task, taskDiv, taskInfo);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = () => deleteTask(task.id);
+
+    actionsDiv.appendChild(completeBtn);
+    actionsDiv.appendChild(editBtn);
+    actionsDiv.appendChild(deleteBtn);
+
+    taskDiv.appendChild(taskInfo);
+    taskDiv.appendChild(actionsDiv);
+    taskList.appendChild(taskDiv);
+  });
+}
+
+// Add Task
+addTaskBtn.addEventListener('click', async () => {
+  const title = taskTitle.value.trim();
+  const description = taskDesc.value.trim();
+  if (!title) return alert('Task title is required');
+  try {
+    await fetch('http://localhost:5000/api/plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, description })
+    });
+    taskTitle.value = '';
+    taskDesc.value = '';
+    fetchTasks();
+  } catch (err) { console.error(err); }
+});
+
+// Generate Tasks from goal
+generateBtn.addEventListener('click', async () => {
+  const goal = goalInput.value.trim();
+  if (!goal) return alert('Please enter a goal');
+  loadingDiv.style.display = 'block';
+  try {
+    const res = await fetch('http://localhost:5000/api/plan/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ goal })
+    });
+    await res.json();
+    goalInput.value = '';
+    fetchTasks();
+  } catch (err) {
+    console.error('Error generating tasks:', err);
+  } finally {
+    loadingDiv.style.display = 'none';
+  }
+});
+
+// Delete Task
+async function deleteTask(id) {
+  try {
+    await fetch(`http://localhost:5000/api/plan/${id}`, { method: 'DELETE' });
+    fetchTasks();
+  } catch (err) { console.error(err); }
+}
+
+// Toggle Complete / Undo
+async function toggleComplete(id) {
+  try {
+    await fetch(`http://localhost:5000/api/plan/${id}/toggle`, { method: 'PUT' });
+    fetchTasks();
+  } catch (err) { console.error(err); }
+}
+
+// Inline Edit
+function inlineEdit(task, taskDiv, taskInfo) {
+  taskInfo.innerHTML = '';
+  const titleInput = document.createElement('input');
+  titleInput.className = 'inline-edit';
+  titleInput.value = task.title;
+  const descInput = document.createElement('input');
+  descInput.className = 'inline-edit';
+  descInput.value = task.description;
+  taskInfo.appendChild(titleInput);
+  taskInfo.appendChild(descInput);
+
+  const actionsDiv = taskDiv.querySelector('.task-actions');
+  actionsDiv.innerHTML = '';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'save-btn';
+  saveBtn.textContent = 'Save';
+  saveBtn.onclick = async () => {
+    if (!titleInput.value.trim()) return alert('Title cannot be empty');
+    try {
+      await fetch(`http://localhost:5000/api/plan/${task.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: titleInput.value,
+          description: descInput.value
+        })
+      });
+      fetchTasks();
+    } catch (err) { console.error(err); }
+  };
+
+  actionsDiv.appendChild(saveBtn);
+}
+
+// Initial load
+fetchTasks();
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Task Planner - Sign Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background: #fdf6f0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; }
+
+    .welcome-title { font-size: 32px; font-weight: 700; color: #5a5a5a; margin-bottom: 40px; text-align: center; }
+
+    .signup-container { background: #fffafc; padding: 40px; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); width: 350px; }
+    h1 { text-align: center; color: #5a5a5a; margin-bottom: 30px; }
+    input { width: 100%; padding: 12px 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #e0dede; font-size: 16px; }
+    button { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #a3cef1; color: #fff; font-weight: 600; cursor: pointer; transition: background 0.3s; }
+    button:hover { background: #7fb8e6; }
+    .login-link { text-align: center; margin-top: 15px; font-size: 14px; color: #888; }
+    .login-link a { color: #a3cef1; text-decoration: none; font-weight: 600; }
+    .login-link a:hover { text-decoration: underline; }
+    .error-msg { color: red; font-size: 14px; margin-top: 5px; text-align: center; }
+    .success-msg { color: green; font-size: 14px; margin-top: 5px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="welcome-title">Welcome to Smart Task Planner</div>
+
+  <div class="signup-container">
+    <h1>Sign Up</h1>
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg"></div>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="signupBtn">Sign Up</button>
+    <div class="login-link">
+      Already have an account? <a href="index.html">Login</a>
+    </div>
+  </div>
+
+  <script>
+    const signupBtn = document.getElementById('signupBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+
+    signupBtn.addEventListener('click', async () => {
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      errorMsg.textContent = '';
+      successMsg.textContent = '';
+
+      if (!username || !email || !password) {
+        errorMsg.textContent = 'Please fill in all fields';
+        return;
+      }
+
+      try {
+        const res = await fetch('http://localhost:5000/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          // Store token and username in localStorage
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('username', data.username);
+
+          successMsg.textContent = 'Account created successfully! Redirecting to dashboard...';
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 2000);
+        } else {
+          errorMsg.textContent = data.message || 'Signup failed';
+        }
+      } catch (err) {
+        errorMsg.textContent = 'Server error. Try again later.';
+      }
+    });
+  </script>
+</body>
+</html>
+
