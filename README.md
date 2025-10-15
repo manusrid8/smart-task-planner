@@ -48,7 +48,8 @@ The core of Smart Task Planner’s intelligence lies in its **Large Language Mod
 - This allows for dynamic, human-like reasoning that makes the generated plans highly practical and adaptive.  
 
 **Example Prompt Used:**  
-> “Break down this goal into actionable tasks with suggested deadlines and dependencies.”
+> “prepare for java exam”
+> (you can use your own)
 
 ---
 
