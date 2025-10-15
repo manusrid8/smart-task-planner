@@ -1,50 +1,66 @@
-# 📝 Smart Task Planner
+# 📝 Smart Task Planner  
 
-**Transform Your Goals Into Actionable Plans – Powered by AI**
+**Transform Your Goals Into Actionable Plans – Powered by AI**  
 
-Smart Task Planner helps users break down goals into structured tasks, estimate timelines, and visualize actionable steps — all with AI reasoning.
+Smart Task Planner helps users break down goals into structured tasks, estimate timelines, and visualize actionable steps — all using **AI reasoning**.
 
 ---
 
-## 🌟 Features
+## 🌟 Features  
 
 **Goal Submission**  
-- Enter any goal (e.g., “Launch a product in 2 weeks”).
+- Enter any goal (e.g., “Launch a product in 2 weeks”).  
 
 **AI-Powered Task Generation**  
-- The AI analyzes your goal and returns a task breakdown with suggested deadlines and dependencies.
+- The AI analyzes your goal and returns a task breakdown with suggested deadlines and dependencies.  
 
 **Task Management Dashboard**  
 - Add, edit, or delete tasks  
 - Mark tasks as completed or pending  
-- View tasks with estimated durations
+- View tasks with estimated durations  
 
 **User Authentication**  
-- Simple login and signup to manage personal goals
+- Simple login and signup to manage personal goals  
 
 **Intuitive Frontend Interface**  
-- Responsive and clean UI to easily view, manage, and update your tasks
+- Responsive and clean UI to easily view, manage, and update your tasks  
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack  
 
 - **Frontend:** HTML, CSS, JavaScript  
 - **Backend:** Node.js, Express.js  
 - **Database:** MySQL  
-- **AI Integration:** OpenAI / OpenRouter for task reasoning  
+- **AI Integration:** OpenRouter (LLaMA model) for intelligent task reasoning  
 
 ---
 
-## ⚡ How It Works
+## 🧠 LLM Integration  
+
+The core of Smart Task Planner’s intelligence lies in its **Large Language Model (LLM) integration**.  
+
+- The backend uses **OpenRouter’s API key** to securely connect with an **LLM such as LLaMA**.  
+- The model interprets user goals and generates:  
+  - A detailed task breakdown  
+  - Estimated timelines  
+  - Task dependencies and order of execution  
+- This allows for dynamic, human-like reasoning that makes the generated plans highly practical and adaptive.  
+
+**Example Prompt Used:**  
+> “Break down this goal into actionable tasks with suggested deadlines and dependencies.”
+
+---
+
+## ⚡ How It Works  
 
 1. User submits a goal via the dashboard.  
-2. Backend sends the goal to the AI model.  
-3. AI returns a detailed plan, including:  
-   - List of tasks  
+2. The backend sends the goal text to the connected LLM (via OpenRouter API).  
+3. The AI returns a detailed plan, including:  
+   - List of actionable tasks  
    - Estimated days to complete each task  
    - Dependencies between tasks  
-4. Users can manage tasks in real-time from the dashboard.
+4. Users can manage and track progress directly from the dashboard.  
 
 ---
 
